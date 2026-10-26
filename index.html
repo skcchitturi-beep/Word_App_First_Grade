@@ -1,0 +1,2474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Spelling Flashcards</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1d4e89">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<script>document.documentElement.className += ' js';</script>
+<style>
+  :root { --ink:#1b1b1f; --bg:#fffdf5; --accent:#1d4e89; --good:#1b6e3a; --line:#b9c3cf; --soft:#e9f1fb; --warn:#fff2c9; }
+  * { box-sizing:border-box; }
+  html { -webkit-text-size-adjust:100%; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:22px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif; overflow-wrap:anywhere; }
+  .wrap { max-width:60rem; margin:0 auto; padding:0 20px 60px; }
+  [id] { scroll-margin-top:16px; }
+  h1 { font-size:2.2rem; line-height:1.2; margin:28px 0 4px; }
+  h2 { font-size:1.6rem; line-height:1.25; margin:0 0 8px; color:var(--accent); }
+  h3 { font-size:1.3rem; margin:18px 0 6px; }
+  h4 { margin:0; }
+  .sub { margin:0 0 16px; color:#444; }
+  a { color:var(--accent); }
+  :focus-visible { outline:5px solid #ff9f1c; outline-offset:3px; }
+  button, .btnlike { display:inline-flex; align-items:center; justify-content:center; min-height:60px; padding:10px 24px; font:inherit; font-weight:700; border-radius:14px; border:3px solid var(--accent); background:#fff; color:var(--accent); cursor:pointer; text-align:center; }
+  button.primary { background:var(--accent); color:#fff; }
+  button.good { background:var(--good); border-color:var(--good); color:#fff; }
+  button:disabled { opacity:.45; cursor:default; }
+  .row { display:flex; flex-wrap:wrap; gap:12px; margin:14px 0; align-items:center; }
+  select, input[type="text"] { font:inherit; min-height:60px; padding:8px 14px; border:3px solid #6b7886; border-radius:14px; background:#fff; color:var(--ink); max-width:100%; }
+  input.spell { width:100%; font-size:2.2rem; text-align:center; letter-spacing:.08em; }
+  label.field { display:block; font-weight:700; margin:10px 0; }
+  .check { display:flex; align-items:center; gap:12px; min-height:52px; font-weight:600; }
+  .check input { width:30px; height:30px; }
+  .panel { border:3px solid var(--accent); border-radius:16px; background:var(--soft); padding:14px 18px; margin:14px 0; }
+  .note { background:var(--warn); border:2px solid #e2c569; border-radius:12px; padding:10px 14px; margin:12px 0; }
+  .block { border:2px solid var(--line); border-radius:18px; padding:14px 20px 18px; margin:22px 0; background:#fff; }
+  .small { font-size:.85rem; color:#333; margin:6px 0; }
+  [hidden] { display:none !important; }
+  .js-only { display:none; }
+  .js .js-only { display:block; }
+  .nojs-only { display:block; }
+  .js .nojs-only { display:none; }
+
+  /* word cards (static) */
+  .cardgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:16px; }
+  .wcard { border:3px solid var(--line); border-radius:18px; padding:14px 18px; background:#fff; }
+  .wcard .cw { font-size:3rem; line-height:1.1; font-weight:800; margin:0 0 6px; color:var(--accent); }
+  .wcard .sentence { font-size:1.15rem; margin:0 0 8px; }
+  details.steps > summary { cursor:pointer; min-height:56px; display:flex; align-items:center; font-weight:700; color:var(--accent); }
+  details.steps ol { padding-left:22px; margin:6px 0 4px; font-size:1rem; }
+  details.steps li { margin:6px 0; }
+  .letters { font-weight:800; letter-spacing:.12em; }
+  .setnav { display:flex; flex-wrap:wrap; gap:10px; padding:0; list-style:none; margin:10px 0; }
+  .setnav a { display:inline-flex; min-height:52px; min-width:52px; align-items:center; justify-content:center; padding:6px 14px; border:3px solid var(--accent); border-radius:14px; font-weight:700; text-decoration:none; }
+  table { border-collapse:collapse; width:100%; font-size:1rem; }
+  th, td { border:1px solid #888; padding:6px 10px; text-align:left; }
+  tr.setstart td, tr.setstart th { border-top:3px solid #333; }
+
+  /* session */
+  .sess-top { margin-bottom:10px; }
+  .sess-count { margin:0; font-weight:700; }
+  progress { width:100%; height:18px; }
+  .bigcard { border:4px solid var(--accent); border-radius:22px; background:#fff; padding:20px 22px; margin:14px 0; text-align:center; }
+  .bigword { font-size:clamp(3.6rem, 16vw, 7.5rem); line-height:1.1; font-weight:800; margin:6px 0; color:var(--accent); text-transform:none; }
+  .bigsentence { font-size:1.6rem; margin:6px 0 14px; }
+  .bigletters { font-size:clamp(2.2rem, 9vw, 4rem); font-weight:800; letter-spacing:.14em; display:block; margin:8px 0; }
+  .ch.bad { background:#ffd966; font-weight:900; text-decoration:underline; padding:0 .06em; border-radius:6px; }
+  .bigcard .row { justify-content:center; }
+  ol.steps-list { text-align:left; padding-left:26px; margin:10px auto; max-width:40rem; }
+  ol.steps-list li { margin:12px 0; }
+  .feedback { min-height:1.6em; font-weight:700; font-size:1.3rem; margin:10px 0; }
+  .tryform { margin:14px auto; max-width:30rem; display:grid; gap:12px; }
+  .dots { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:8px 0; }
+  .dots button { min-height:52px; min-width:52px; padding:6px 10px; }
+  .dots button.on { background:var(--accent); color:#fff; }
+  ul.review { list-style:none; padding:0; margin:10px 0; }
+  ul.review li { display:flex; flex-wrap:wrap; justify-content:space-between; gap:6px 16px; border:2px solid var(--line); border-radius:12px; padding:10px 16px; margin:8px 0; background:#fff; }
+  .rw { font-size:1.6rem; font-weight:800; }
+  .counts { list-style:none; padding:0; display:flex; flex-wrap:wrap; gap:12px; margin:8px 0; }
+  .counts li { border:2px solid var(--line); border-radius:12px; padding:8px 16px; background:#fff; }
+  .counts b { font-size:1.4rem; }
+  ul.chips { list-style:none; display:flex; flex-wrap:wrap; gap:8px; padding:0; margin:4px 0 10px; }
+  ul.chips li { border:2px solid var(--line); border-radius:10px; padding:4px 12px; background:#fff; font-size:1rem; }
+  ul.chips li span { display:block; font-size:.78rem; color:#333; }
+  body.in-session .hide-in-session { display:none !important; }
+
+  @media (max-width:600px) { body { font-size:19px; } h1 { font-size:1.8rem; } }
+  @media print {
+    #app, #cards, .setnav, .noprint, button, .js-only, .js .js-only, noscript { display:none !important; }
+    body { background:#fff; font-size:12pt; }
+    .wrap { max-width:none; padding:0; }
+    .block { border-color:#555; }
+    tr { break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>My Spelling Flashcards</h1>
+    <p class="sub">100 common words from your word list, 10 words at a time. Short practice is best.</p>
+  </header>
+
+  <noscript>
+    <div class="note" role="note"><strong>Interactive spelling practice needs JavaScript.</strong> JavaScript is off or not running here, so you can read the words, sentences, and learning steps below, but you cannot practice, save progress, or hear words. If you are in a file preview on an iPad, try opening the file in Safari.</div>
+  </noscript>
+
+  <!-- ============ INTERACTIVE APP (JavaScript only) ============ -->
+  <section id="app" class="js-only" aria-labelledby="app-h">
+    <h2 id="app-h" class="hide-in-session" style="display:none">Practice</h2>
+
+    <div id="home">
+      <div class="block">
+        <h2>Let's practice!</h2>
+        <p>Pick a set of 10 words. First <strong>learn</strong> them together. Then <strong>practice</strong> spelling them.</p>
+        <p class="small">A session of about 5&ndash;10 minutes is plenty. You do not have to finish all 100 words.</p>
+        <label class="field" for="scope">Which words?
+          <select id="scope">
+            <option value="1">Set 1: the, to, and, of, a, in, is, I, you, it</option>
+            <option value="2">Set 2: for, that, on, was, with, are, this, be, not, as</option>
+            <option value="3">Set 3: at, he, have, from, or, they, all, but, by, your</option>
+            <option value="4">Set 4: one, can, we, his, if, will, what, about, my, do</option>
+            <option value="5">Set 5: there, an, up, had, out, when, so, no, would, more</option>
+            <option value="6">Set 6: she, were, her, like, me, some, their, other, time, has</option>
+            <option value="7">Set 7: get, them, then, people, how, see, who, just, new, into</option>
+            <option value="8">Set 8: now, been, which, only, could, know, any, these, over, than</option>
+            <option value="9">Set 9: back, him, first, very, us, go, our, good, may, make</option>
+            <option value="10">Set 10: here, two, many, also, way, did, where, use, down, home</option>
+            <option value="practicing">Words I am practicing</option>
+          </select>
+        </label>
+        <label class="check" for="shuffle"><input type="checkbox" id="shuffle"> Shuffle the cards</label>
+        <div class="row">
+          <button type="button" class="primary" id="go-learn">Learn the words</button>
+          <button type="button" class="primary" id="go-type">Practice: type it</button>
+          <button type="button" id="go-paper">Practice: paper with a grown-up</button>
+        </div>
+        <p id="home-msg" class="feedback" role="status" aria-live="polite"></p>
+      </div>
+
+      <div class="block">
+        <h2>My progress</h2>
+        <ul class="counts">
+          <li>Practicing: <b id="c-practicing">0</b></li>
+          <li>Spelled correctly without help: <b id="c-without">0</b></li>
+          <li>Not started: <b id="c-new">100</b></li>
+        </ul>
+        <p class="small">Correct on my own: <span id="c-ind">0</span> times. Correct after seeing the word: <span id="c-asst">0</span> times.</p>
+        <p class="small">A word moves to &ldquo;Spelled correctly without help&rdquo; after it is spelled correctly on its own two times in a row. Words that need more practice come back more often.</p>
+        <div id="chips"></div>
+      </div>
+
+      <div class="block">
+        <h2>Grown-up tools</h2>
+        <p id="offline-note" class="small" role="status">Offline use: checking&hellip;</p>
+        <p id="storage-note" class="small" role="status">Checking whether progress can be saved on this device&hellip;</p>
+        <div class="row">
+          <button type="button" id="btn-save">Save progress (download file)</button>
+          <label class="btnlike" for="file-load">Load progress (choose file)</label>
+          <input type="file" id="file-load" accept=".json,application/json" style="position:absolute;left:-9999px" aria-label="Load progress file">
+          <button type="button" id="btn-print">Print word list</button>
+          <button type="button" id="btn-reset">Reset progress</button>
+        </div>
+        <div class="panel" id="load-panel" hidden>
+          <p id="load-text"></p>
+          <div class="row"><button type="button" class="primary" id="load-yes">Replace my progress</button><button type="button" id="load-no">Cancel</button></div>
+        </div>
+        <div class="panel" id="reset-panel" hidden>
+          <p><strong>Grown-up check.</strong> This erases all progress on this device.</p>
+          <label class="check" for="reset-ok"><input type="checkbox" id="reset-ok"> I am a grown-up and I want to erase progress.</label>
+          <div class="row"><button type="button" class="primary" id="reset-yes" disabled>Erase progress</button><button type="button" id="reset-no">Cancel</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="session" hidden>
+      <div id="stage"></div>
+    </div>
+  </section>
+
+  <!-- ============ PARENT OVERVIEW ============ -->
+  <section id="parent-overview" class="block hide-in-session" aria-labelledby="po-h">
+    <h2 id="po-h">For grown-ups</h2>
+    <details open>
+      <summary style="min-height:52px;display:flex;align-items:center;font-weight:700;cursor:pointer">Overview and how to use this page</summary>
+      <p>This activity teaches 100 common words in 10 sets of 10. The words and their grouping are the list you supplied; I have not verified them against any published word list. The practice sentences and spelling notes were written for this activity.</p>
+      <ul>
+        <li><strong>Learn</strong> walks through each word: say it, look closely, spell it, hide it, try it, check it, use it in a sentence.</li>
+        <li><strong>Practice: type it</strong> hides the word. The child hears it (or you say it), then types it. A wrong try is kept on screen next to the correct spelling, with the letters to notice highlighted. The child studies it, then tries again from memory.</li>
+        <li><strong>Practice: paper with a grown-up</strong> is for writing with a pencil. You see the word, say it, and mark the result.</li>
+        <li>Words spelled correctly on the first try with no help count as &ldquo;on my own.&rdquo; Words spelled after seeing the word count separately as &ldquo;after seeing the word.&rdquo; One correct answer does not make a word &ldquo;mastered.&rdquo;</li>
+        <li>No timers, scores against others, or penalties. Short sessions of about 5&ndash;10 minutes work well.</li>
+      </ul>
+      <p><strong>Hearing words:</strong> the &ldquo;Hear the word&rdquo; button uses the device&rsquo;s built-in voice if there is one. Voices and pronunciation vary by device. If it is not available, the page asks a grown-up to say the word. Nothing plays automatically.</p>
+      <p><strong>Keyboard clues:</strong> autocorrect, spell-check, and capital letters are turned off for the answer box where the browser allows it, but an iPad keyboard may still show word suggestions. If that is a problem, use the paper mode.</p>
+      <p><strong>Privacy:</strong> nothing is sent anywhere. Progress stays on this device, in this browser, unless you save the progress file and share it yourself. Browser storage can be cleared by the browser, so use &ldquo;Save progress&rdquo; if you want a backup. No names or personal details are collected.</p>
+      <p><strong>Opening this file:</strong> an iPad file preview may show this page without running JavaScript. In that case you can read the words and steps but cannot practice. Open it in Safari for the interactive version. This is a downloaded file, not a website address.</p>
+    </details>
+  </section>
+
+  <!-- ============ PARENT WORD LIST ============ -->
+  <section id="word-list" class="block hide-in-session" aria-labelledby="wl-h">
+    <h2 id="wl-h">Parent word list (100 words, 10 sets)</h2>
+    <p class="noprint"><button type="button" class="js-only" onclick="window.print()" style="display:none">Print word list</button></p>
+    <table>
+      <thead><tr><th scope="col">Set</th><th scope="col">Word</th><th scope="col">Practice sentence</th></tr></thead>
+      <tbody>
+        <tr class="setstart"><th scope="row">1</th><td><strong>the</strong></td><td>I see the moon.</td></tr>
+        <tr><th scope="row">1</th><td><strong>to</strong></td><td>We walk to school.</td></tr>
+        <tr><th scope="row">1</th><td><strong>and</strong></td><td>I like milk and cookies.</td></tr>
+        <tr><th scope="row">1</th><td><strong>of</strong></td><td>A cup of milk is on the table.</td></tr>
+        <tr><th scope="row">1</th><td><strong>a</strong></td><td>I see a bird.</td></tr>
+        <tr><th scope="row">1</th><td><strong>in</strong></td><td>The toy is in the box.</td></tr>
+        <tr><th scope="row">1</th><td><strong>is</strong></td><td>The sky is blue.</td></tr>
+        <tr><th scope="row">1</th><td><strong>I</strong></td><td>I like to read.</td></tr>
+        <tr><th scope="row">1</th><td><strong>you</strong></td><td>I like you.</td></tr>
+        <tr><th scope="row">1</th><td><strong>it</strong></td><td>I can see it.</td></tr>
+        <tr class="setstart"><th scope="row">2</th><td><strong>for</strong></td><td>This gift is for you.</td></tr>
+        <tr><th scope="row">2</th><td><strong>that</strong></td><td>I like that book.</td></tr>
+        <tr><th scope="row">2</th><td><strong>on</strong></td><td>The book is on the table.</td></tr>
+        <tr><th scope="row">2</th><td><strong>was</strong></td><td>It was a sunny day.</td></tr>
+        <tr><th scope="row">2</th><td><strong>with</strong></td><td>I play with my friend.</td></tr>
+        <tr><th scope="row">2</th><td><strong>are</strong></td><td>You are my friend.</td></tr>
+        <tr><th scope="row">2</th><td><strong>this</strong></td><td>I like this hat.</td></tr>
+        <tr><th scope="row">2</th><td><strong>be</strong></td><td>Please be kind.</td></tr>
+        <tr><th scope="row">2</th><td><strong>not</strong></td><td>It is not raining.</td></tr>
+        <tr><th scope="row">2</th><td><strong>as</strong></td><td>Use it as a hat.</td></tr>
+        <tr class="setstart"><th scope="row">3</th><td><strong>at</strong></td><td>We play at the park.</td></tr>
+        <tr><th scope="row">3</th><td><strong>he</strong></td><td>He has a red ball.</td></tr>
+        <tr><th scope="row">3</th><td><strong>have</strong></td><td>I have a new pencil.</td></tr>
+        <tr><th scope="row">3</th><td><strong>from</strong></td><td>A letter came from Grandma.</td></tr>
+        <tr><th scope="row">3</th><td><strong>or</strong></td><td>Do you want milk or juice?</td></tr>
+        <tr><th scope="row">3</th><td><strong>they</strong></td><td>They ride the bus.</td></tr>
+        <tr><th scope="row">3</th><td><strong>all</strong></td><td>We all clapped.</td></tr>
+        <tr><th scope="row">3</th><td><strong>but</strong></td><td>I am small but strong.</td></tr>
+        <tr><th scope="row">3</th><td><strong>by</strong></td><td>Sit by me.</td></tr>
+        <tr><th scope="row">3</th><td><strong>your</strong></td><td>Put on your coat.</td></tr>
+        <tr class="setstart"><th scope="row">4</th><td><strong>one</strong></td><td>I have one apple.</td></tr>
+        <tr><th scope="row">4</th><td><strong>can</strong></td><td>I can jump high.</td></tr>
+        <tr><th scope="row">4</th><td><strong>we</strong></td><td>We can play outside.</td></tr>
+        <tr><th scope="row">4</th><td><strong>his</strong></td><td>That is his hat.</td></tr>
+        <tr><th scope="row">4</th><td><strong>if</strong></td><td>Tell me if you are ready.</td></tr>
+        <tr><th scope="row">4</th><td><strong>will</strong></td><td>I will help you.</td></tr>
+        <tr><th scope="row">4</th><td><strong>what</strong></td><td>What is that?</td></tr>
+        <tr><th scope="row">4</th><td><strong>about</strong></td><td>The story is about a dog.</td></tr>
+        <tr><th scope="row">4</th><td><strong>my</strong></td><td>This is my bag.</td></tr>
+        <tr><th scope="row">4</th><td><strong>do</strong></td><td>I do my work.</td></tr>
+        <tr class="setstart"><th scope="row">5</th><td><strong>there</strong></td><td>Put the book over there.</td></tr>
+        <tr><th scope="row">5</th><td><strong>an</strong></td><td>I ate an apple.</td></tr>
+        <tr><th scope="row">5</th><td><strong>up</strong></td><td>Look up at the stars.</td></tr>
+        <tr><th scope="row">5</th><td><strong>had</strong></td><td>We had fun today.</td></tr>
+        <tr><th scope="row">5</th><td><strong>out</strong></td><td>Let us go out to play.</td></tr>
+        <tr><th scope="row">5</th><td><strong>when</strong></td><td>Tell me when you are ready.</td></tr>
+        <tr><th scope="row">5</th><td><strong>so</strong></td><td>I am so happy.</td></tr>
+        <tr><th scope="row">5</th><td><strong>no</strong></td><td>There is no milk.</td></tr>
+        <tr><th scope="row">5</th><td><strong>would</strong></td><td>I would like a cookie.</td></tr>
+        <tr><th scope="row">5</th><td><strong>more</strong></td><td>May I have more?</td></tr>
+        <tr class="setstart"><th scope="row">6</th><td><strong>she</strong></td><td>She drew a picture.</td></tr>
+        <tr><th scope="row">6</th><td><strong>were</strong></td><td>We were at the park.</td></tr>
+        <tr><th scope="row">6</th><td><strong>her</strong></td><td>I gave her a card.</td></tr>
+        <tr><th scope="row">6</th><td><strong>like</strong></td><td>I like to paint.</td></tr>
+        <tr><th scope="row">6</th><td><strong>me</strong></td><td>Please read to me.</td></tr>
+        <tr><th scope="row">6</th><td><strong>some</strong></td><td>I want some water.</td></tr>
+        <tr><th scope="row">6</th><td><strong>their</strong></td><td>They lost their hats.</td></tr>
+        <tr><th scope="row">6</th><td><strong>other</strong></td><td>Give me the other one.</td></tr>
+        <tr><th scope="row">6</th><td><strong>time</strong></td><td>It is time for lunch.</td></tr>
+        <tr><th scope="row">6</th><td><strong>has</strong></td><td>She has a red hat.</td></tr>
+        <tr class="setstart"><th scope="row">7</th><td><strong>get</strong></td><td>Please get your coat.</td></tr>
+        <tr><th scope="row">7</th><td><strong>them</strong></td><td>I will help them.</td></tr>
+        <tr><th scope="row">7</th><td><strong>then</strong></td><td>First we eat, then we play.</td></tr>
+        <tr><th scope="row">7</th><td><strong>people</strong></td><td>Many people came to the show.</td></tr>
+        <tr><th scope="row">7</th><td><strong>how</strong></td><td>How are you today?</td></tr>
+        <tr><th scope="row">7</th><td><strong>see</strong></td><td>I see a bird.</td></tr>
+        <tr><th scope="row">7</th><td><strong>who</strong></td><td>Who is at the door?</td></tr>
+        <tr><th scope="row">7</th><td><strong>just</strong></td><td>I just ate lunch.</td></tr>
+        <tr><th scope="row">7</th><td><strong>new</strong></td><td>I have a new pencil.</td></tr>
+        <tr><th scope="row">7</th><td><strong>into</strong></td><td>The cat jumped into the box.</td></tr>
+        <tr class="setstart"><th scope="row">8</th><td><strong>now</strong></td><td>Come here now.</td></tr>
+        <tr><th scope="row">8</th><td><strong>been</strong></td><td>I have been to the zoo.</td></tr>
+        <tr><th scope="row">8</th><td><strong>which</strong></td><td>Which one do you want?</td></tr>
+        <tr><th scope="row">8</th><td><strong>only</strong></td><td>I have only one.</td></tr>
+        <tr><th scope="row">8</th><td><strong>could</strong></td><td>I could see the moon.</td></tr>
+        <tr><th scope="row">8</th><td><strong>know</strong></td><td>I know the answer.</td></tr>
+        <tr><th scope="row">8</th><td><strong>any</strong></td><td>Do you have any milk?</td></tr>
+        <tr><th scope="row">8</th><td><strong>these</strong></td><td>I like these shoes.</td></tr>
+        <tr><th scope="row">8</th><td><strong>over</strong></td><td>The cow jumped over the moon.</td></tr>
+        <tr><th scope="row">8</th><td><strong>than</strong></td><td>A whale is bigger than a fish.</td></tr>
+        <tr class="setstart"><th scope="row">9</th><td><strong>back</strong></td><td>Come back soon.</td></tr>
+        <tr><th scope="row">9</th><td><strong>him</strong></td><td>I gave him a hug.</td></tr>
+        <tr><th scope="row">9</th><td><strong>first</strong></td><td>I was first in line.</td></tr>
+        <tr><th scope="row">9</th><td><strong>very</strong></td><td>The soup is very hot.</td></tr>
+        <tr><th scope="row">9</th><td><strong>us</strong></td><td>Come with us.</td></tr>
+        <tr><th scope="row">9</th><td><strong>go</strong></td><td>Let us go home.</td></tr>
+        <tr><th scope="row">9</th><td><strong>our</strong></td><td>This is our house.</td></tr>
+        <tr><th scope="row">9</th><td><strong>good</strong></td><td>That is a good book.</td></tr>
+        <tr><th scope="row">9</th><td><strong>may</strong></td><td>May I have a turn?</td></tr>
+        <tr><th scope="row">9</th><td><strong>make</strong></td><td>Let us make a card.</td></tr>
+        <tr class="setstart"><th scope="row">10</th><td><strong>here</strong></td><td>Come here, please.</td></tr>
+        <tr><th scope="row">10</th><td><strong>two</strong></td><td>I have two hands.</td></tr>
+        <tr><th scope="row">10</th><td><strong>many</strong></td><td>I see many stars.</td></tr>
+        <tr><th scope="row">10</th><td><strong>also</strong></td><td>I also like pears.</td></tr>
+        <tr><th scope="row">10</th><td><strong>way</strong></td><td>This is the way.</td></tr>
+        <tr><th scope="row">10</th><td><strong>did</strong></td><td>I did my best.</td></tr>
+        <tr><th scope="row">10</th><td><strong>where</strong></td><td>Where is my hat?</td></tr>
+        <tr><th scope="row">10</th><td><strong>use</strong></td><td>I use a pencil.</td></tr>
+        <tr><th scope="row">10</th><td><strong>down</strong></td><td>Sit down, please.</td></tr>
+        <tr><th scope="row">10</th><td><strong>home</strong></td><td>I go home after school.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ STATIC WORD CARDS ============ -->
+  <section id="cards" class="hide-in-session" aria-labelledby="cards-h">
+    <h2 id="cards-h">All the word cards</h2>
+    <nav aria-label="Go to a set"><ul class="setnav">
+      <li><a href="#set1">Set 1</a></li>
+      <li><a href="#set2">Set 2</a></li>
+      <li><a href="#set3">Set 3</a></li>
+      <li><a href="#set4">Set 4</a></li>
+      <li><a href="#set5">Set 5</a></li>
+      <li><a href="#set6">Set 6</a></li>
+      <li><a href="#set7">Set 7</a></li>
+      <li><a href="#set8">Set 8</a></li>
+      <li><a href="#set9">Set 9</a></li>
+      <li><a href="#set10">Set 10</a></li>
+    </ul></nav>
+  <section class="block" id="set1" aria-labelledby="set1-h">
+    <h3 id="set1-h">Set 1</h3>
+    <details class="steps"><summary>Grown-up help for this set</summary><p>Several of these are tricky: the, to, of, and you do not follow the usual letter sounds. A and I are single letters.</p></details>
+    <div class="cardgrid">
+      <article class="wcard" id="w-the" data-set="1">
+        <h4 class="cw">the</h4>
+        <p class="sentence">I see the moon.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. t and h work together at the start. Remember the e on the end.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">t – h – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-to" data-set="1">
+        <h4 class="cw">to</h4>
+        <p class="sentence">We walk to school.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. The o does not say its usual sound here. Remember t-o.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">t – o</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-and" data-set="1">
+        <h4 class="cw">and</h4>
+        <p class="sentence">I like milk and cookies.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Three letters: a, n, d. It ends with d.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">a – n – d</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-of" data-set="1">
+        <h4 class="cw">of</h4>
+        <p class="sentence">A cup of milk is on the table.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. It ends with f but sounds like “uv.” Remember o-f.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">o – f</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-a" data-set="1">
+        <h4 class="cw">a</h4>
+        <p class="sentence">I see a bird.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Just one letter: a.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">a</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-in" data-set="1">
+        <h4 class="cw">in</h4>
+        <p class="sentence">The toy is in the box.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters: i, n.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">i – n</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-is" data-set="1">
+        <h4 class="cw">is</h4>
+        <p class="sentence">The sky is blue.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">The last letter is s, but it sounds like z. Remember i-s.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">i – s</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-I-upper" data-set="1">
+        <h4 class="cw">I</h4>
+        <p class="sentence">I like to read.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">One letter, and it is always a capital I.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">I</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-you" data-set="1">
+        <h4 class="cw">you</h4>
+        <p class="sentence">I like you.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. Remember y-o-u.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">y – o – u</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-it" data-set="1">
+        <h4 class="cw">it</h4>
+        <p class="sentence">I can see it.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters: i, t.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">i – t</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="block" id="set2" aria-labelledby="set2-h">
+    <h3 id="set2-h">Set 2</h3>
+    <details class="steps"><summary>Grown-up help for this set</summary><p>That, this, and with start or end with the th letters working together.</p></details>
+    <div class="cardgrid">
+      <article class="wcard" id="w-for" data-set="2">
+        <h4 class="cw">for</h4>
+        <p class="sentence">This gift is for you.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">f-o-r. The o and r work together.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">f – o – r</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-that" data-set="2">
+        <h4 class="cw">that</h4>
+        <p class="sentence">I like that book.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">th at the start, then a, then t at the end.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">t – h – a – t</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-on" data-set="2">
+        <h4 class="cw">on</h4>
+        <p class="sentence">The book is on the table.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters: o, n.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">o – n</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-was" data-set="2">
+        <h4 class="cw">was</h4>
+        <p class="sentence">It was a sunny day.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. It sounds like “wuz.” Remember w-a-s.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">w – a – s</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-with" data-set="2">
+        <h4 class="cw">with</h4>
+        <p class="sentence">I play with my friend.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">t and h work together at the end. Remember w-i-th.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">w – i – t – h</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-are" data-set="2">
+        <h4 class="cw">are</h4>
+        <p class="sentence">You are my friend.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. It sounds like “ar” but ends with a quiet e. Remember a-r-e.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">a – r – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-this" data-set="2">
+        <h4 class="cw">this</h4>
+        <p class="sentence">I like this hat.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">th at the start, then i-s. Remember t-h-i-s.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">t – h – i – s</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-be" data-set="2">
+        <h4 class="cw">be</h4>
+        <p class="sentence">Please be kind.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters. The e says its name.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">b – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-not" data-set="2">
+        <h4 class="cw">not</h4>
+        <p class="sentence">It is not raining.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Three sounds: n, o, t. It ends with t.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">n – o – t</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-as" data-set="2">
+        <h4 class="cw">as</h4>
+        <p class="sentence">Use it as a hat.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters: a, s. The s sounds like z.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">a – s</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="block" id="set3" aria-labelledby="set3-h">
+    <h3 id="set3-h">Set 3</h3>
+    <details class="steps"><summary>Grown-up help for this set</summary><p>Have, from, and they have parts that need extra looks.</p></details>
+    <div class="cardgrid">
+      <article class="wcard" id="w-at" data-set="3">
+        <h4 class="cw">at</h4>
+        <p class="sentence">We play at the park.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters: a, t.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">a – t</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-he" data-set="3">
+        <h4 class="cw">he</h4>
+        <p class="sentence">He has a red ball.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters. The e says its name.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">h – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-have" data-set="3">
+        <h4 class="cw">have</h4>
+        <p class="sentence">I have a new pencil.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">h-a-v-e. The e at the end is quiet. Remember the e.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">h – a – v – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-from" data-set="3">
+        <h4 class="cw">from</h4>
+        <p class="sentence">A letter came from Grandma.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">f-r-o-m. fr at the start.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">f – r – o – m</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-or" data-set="3">
+        <h4 class="cw">or</h4>
+        <p class="sentence">Do you want milk or juice?</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters: o, r.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">o – r</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-they" data-set="3">
+        <h4 class="cw">they</h4>
+        <p class="sentence">They ride the bus.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. It starts like the. It ends with e-y.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">t – h – e – y</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-all" data-set="3">
+        <h4 class="cw">all</h4>
+        <p class="sentence">We all clapped.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">a-l-l. Two l letters at the end.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">a – l – l</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-but" data-set="3">
+        <h4 class="cw">but</h4>
+        <p class="sentence">I am small but strong.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Three sounds: b, u, t. It ends with t.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">b – u – t</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-by" data-set="3">
+        <h4 class="cw">by</h4>
+        <p class="sentence">Sit by me.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters. The y at the end says the name of the letter i.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">b – y</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-your" data-set="3">
+        <h4 class="cw">your</h4>
+        <p class="sentence">Put on your coat.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. It is like you with an r on the end: y-o-u-r.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">y – o – u – r</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="block" id="set4" aria-labelledby="set4-h">
+    <h3 id="set4-h">Set 4</h3>
+    <details class="steps"><summary>Grown-up help for this set</summary><p>One, what, and about have parts that are not spelled the way they sound.</p></details>
+    <div class="cardgrid">
+      <article class="wcard" id="w-one" data-set="4">
+        <h4 class="cw">one</h4>
+        <p class="sentence">I have one apple.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. It sounds like “wun.” Remember o-n-e.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">o – n – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-can" data-set="4">
+        <h4 class="cw">can</h4>
+        <p class="sentence">I can jump high.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Three letters: c, a, n. The c says its k sound here.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">c – a – n</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-we" data-set="4">
+        <h4 class="cw">we</h4>
+        <p class="sentence">We can play outside.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters. The e says its name.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">w – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-his" data-set="4">
+        <h4 class="cw">his</h4>
+        <p class="sentence">That is his hat.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">h-i-s. The s sounds like z.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">h – i – s</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-if" data-set="4">
+        <h4 class="cw">if</h4>
+        <p class="sentence">Tell me if you are ready.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters: i, f.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">i – f</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-will" data-set="4">
+        <h4 class="cw">will</h4>
+        <p class="sentence">I will help you.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">w-i-l-l. Two l letters at the end.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">w – i – l – l</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-what" data-set="4">
+        <h4 class="cw">what</h4>
+        <p class="sentence">What is that?</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. It starts with w and h. Remember w-h-a-t.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">w – h – a – t</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-about" data-set="4">
+        <h4 class="cw">about</h4>
+        <p class="sentence">The story is about a dog.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">a-b-o-u-t. Say a-bout. Remember o-u in the middle.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">a – b – o – u – t</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-my" data-set="4">
+        <h4 class="cw">my</h4>
+        <p class="sentence">This is my bag.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters. The y at the end says the name of the letter i.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">m – y</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-do" data-set="4">
+        <h4 class="cw">do</h4>
+        <p class="sentence">I do my work.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. It sounds like “doo.” Remember d-o.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">d – o</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="block" id="set5" aria-labelledby="set5-h">
+    <h3 id="set5-h">Set 5</h3>
+    <details class="steps"><summary>Grown-up help for this set</summary><p>There, would, and when are words to look at closely.</p></details>
+    <div class="cardgrid">
+      <article class="wcard" id="w-there" data-set="5">
+        <h4 class="cw">there</h4>
+        <p class="sentence">Put the book over there.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. Remember t-h-e-r-e. The word here is hiding inside.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">t – h – e – r – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-an" data-set="5">
+        <h4 class="cw">an</h4>
+        <p class="sentence">I ate an apple.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters: a, n.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">a – n</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-up" data-set="5">
+        <h4 class="cw">up</h4>
+        <p class="sentence">Look up at the stars.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters: u, p.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">u – p</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-had" data-set="5">
+        <h4 class="cw">had</h4>
+        <p class="sentence">We had fun today.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Three sounds: h, a, d.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">h – a – d</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-out" data-set="5">
+        <h4 class="cw">out</h4>
+        <p class="sentence">Let us go out to play.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">o-u-t. The o and u work together.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">o – u – t</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-when" data-set="5">
+        <h4 class="cw">when</h4>
+        <p class="sentence">Tell me when you are ready.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">It starts with w and h. Remember w-h-e-n.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">w – h – e – n</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-so" data-set="5">
+        <h4 class="cw">so</h4>
+        <p class="sentence">I am so happy.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters. The o says its name.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">s – o</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-no" data-set="5">
+        <h4 class="cw">no</h4>
+        <p class="sentence">There is no milk.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters. The o says its name.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">n – o</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-would" data-set="5">
+        <h4 class="cw">would</h4>
+        <p class="sentence">I would like a cookie.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. It sounds like “wud.” Remember w-o-u-l-d.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">w – o – u – l – d</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-more" data-set="5">
+        <h4 class="cw">more</h4>
+        <p class="sentence">May I have more?</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">m-o-r-e. The e at the end is quiet.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">m – o – r – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="block" id="set6" aria-labelledby="set6-h">
+    <h3 id="set6-h">Set 6</h3>
+    <details class="steps"><summary>Grown-up help for this set</summary><p>Were, some, and their do not follow the usual letter sounds.</p></details>
+    <div class="cardgrid">
+      <article class="wcard" id="w-she" data-set="6">
+        <h4 class="cw">she</h4>
+        <p class="sentence">She drew a picture.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">s and h work together to say sh. Then e says its name.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">s – h – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-were" data-set="6">
+        <h4 class="cw">were</h4>
+        <p class="sentence">We were at the park.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. It sounds like “wur.” Remember w-e-r-e.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">w – e – r – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-her" data-set="6">
+        <h4 class="cw">her</h4>
+        <p class="sentence">I gave her a card.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Three letters: h, e, r.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">h – e – r</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-like" data-set="6">
+        <h4 class="cw">like</h4>
+        <p class="sentence">I like to paint.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">l-i-k-e. The e at the end is quiet.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">l – i – k – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-me" data-set="6">
+        <h4 class="cw">me</h4>
+        <p class="sentence">Please read to me.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters. The e says its name.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">m – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-some" data-set="6">
+        <h4 class="cw">some</h4>
+        <p class="sentence">I want some water.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. It sounds like “sum.” Remember s-o-m-e.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">s – o – m – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-their" data-set="6">
+        <h4 class="cw">their</h4>
+        <p class="sentence">They lost their hats.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. It sounds like “there” but is spelled t-h-e-i-r.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">t – h – e – i – r</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-other" data-set="6">
+        <h4 class="cw">other</h4>
+        <p class="sentence">Give me the other one.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">o-t-h-e-r. It starts with o. Then th works together.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">o – t – h – e – r</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-time" data-set="6">
+        <h4 class="cw">time</h4>
+        <p class="sentence">It is time for lunch.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">t-i-m-e. The e at the end is quiet.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">t – i – m – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-has" data-set="6">
+        <h4 class="cw">has</h4>
+        <p class="sentence">She has a red hat.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">h-a-s. The s sounds like z.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">h – a – s</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="block" id="set7" aria-labelledby="set7-h">
+    <h3 id="set7-h">Set 7</h3>
+    <details class="steps"><summary>Grown-up help for this set</summary><p>Them and then look alike. People and who need extra looks. Into is in and to put together.</p></details>
+    <div class="cardgrid">
+      <article class="wcard" id="w-get" data-set="7">
+        <h4 class="cw">get</h4>
+        <p class="sentence">Please get your coat.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Three sounds: g, e, t.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">g – e – t</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-them" data-set="7">
+        <h4 class="cw">them</h4>
+        <p class="sentence">I will help them.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">t and h work together at the start. Then e, m.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">t – h – e – m</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-then" data-set="7">
+        <h4 class="cw">then</h4>
+        <p class="sentence">First we eat, then we play.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Like them, but it ends with n: t-h-e-n.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">t – h – e – n</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-people" data-set="7">
+        <h4 class="cw">people</h4>
+        <p class="sentence">Many people came to the show.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. Remember p-e-o-p-l-e.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">p – e – o – p – l – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-how" data-set="7">
+        <h4 class="cw">how</h4>
+        <p class="sentence">How are you today?</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">h-o-w. The o and w work together.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">h – o – w</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-see" data-set="7">
+        <h4 class="cw">see</h4>
+        <p class="sentence">I see a bird.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two e letters work together and say the name of the letter e.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">s – e – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-who" data-set="7">
+        <h4 class="cw">who</h4>
+        <p class="sentence">Who is at the door?</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. It sounds like “hoo.” Remember w-h-o.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">w – h – o</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-just" data-set="7">
+        <h4 class="cw">just</h4>
+        <p class="sentence">I just ate lunch.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Four sounds: j, u, s, t.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">j – u – s – t</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-new" data-set="7">
+        <h4 class="cw">new</h4>
+        <p class="sentence">I have a new pencil.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">n-e-w. The e and w work together.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">n – e – w</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-into" data-set="7">
+        <h4 class="cw">into</h4>
+        <p class="sentence">The cat jumped into the box.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">It is in and to put together: i-n-t-o.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">i – n – t – o</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="block" id="set8" aria-labelledby="set8-h">
+    <h3 id="set8-h">Set 8</h3>
+    <details class="steps"><summary>Grown-up help for this set</summary><p>Which, could, know, and any have parts to remember.</p></details>
+    <div class="cardgrid">
+      <article class="wcard" id="w-now" data-set="8">
+        <h4 class="cw">now</h4>
+        <p class="sentence">Come here now.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">n-o-w. The o and w work together.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">n – o – w</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-been" data-set="8">
+        <h4 class="cw">been</h4>
+        <p class="sentence">I have been to the zoo.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. Remember b-e-e-n.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">b – e – e – n</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-which" data-set="8">
+        <h4 class="cw">which</h4>
+        <p class="sentence">Which one do you want?</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">w-h-i-c-h. It starts with w and h and ends with c and h.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">w – h – i – c – h</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-only" data-set="8">
+        <h4 class="cw">only</h4>
+        <p class="sentence">I have only one.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">o-n-l-y. The y at the end says the name of the letter e.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">o – n – l – y</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-could" data-set="8">
+        <h4 class="cw">could</h4>
+        <p class="sentence">I could see the moon.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. It sounds like “cud.” Remember c-o-u-l-d.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">c – o – u – l – d</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-know" data-set="8">
+        <h4 class="cw">know</h4>
+        <p class="sentence">I know the answer.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">The k is quiet. Remember k-n-o-w.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">k – n – o – w</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-any" data-set="8">
+        <h4 class="cw">any</h4>
+        <p class="sentence">Do you have any milk?</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. The a does not say its usual sound. Remember a-n-y.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">a – n – y</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-these" data-set="8">
+        <h4 class="cw">these</h4>
+        <p class="sentence">I like these shoes.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">t-h-e-s-e. It looks like the with se on the end.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">t – h – e – s – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-over" data-set="8">
+        <h4 class="cw">over</h4>
+        <p class="sentence">The cow jumped over the moon.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">o-v-e-r.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">o – v – e – r</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-than" data-set="8">
+        <h4 class="cw">than</h4>
+        <p class="sentence">A whale is bigger than a fish.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Like then, but with an a: t-h-a-n.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">t – h – a – n</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="block" id="set9" aria-labelledby="set9-h">
+    <h3 id="set9-h">Set 9</h3>
+    <details class="steps"><summary>Grown-up help for this set</summary><p>Our and first have parts to remember.</p></details>
+    <div class="cardgrid">
+      <article class="wcard" id="w-back" data-set="9">
+        <h4 class="cw">back</h4>
+        <p class="sentence">Come back soon.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">b-a-c-k. It ends with c and k.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">b – a – c – k</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-him" data-set="9">
+        <h4 class="cw">him</h4>
+        <p class="sentence">I gave him a hug.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Three letters: h, i, m.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">h – i – m</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-first" data-set="9">
+        <h4 class="cw">first</h4>
+        <p class="sentence">I was first in line.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">f-i-r-s-t. The i and r work together.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">f – i – r – s – t</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-very" data-set="9">
+        <h4 class="cw">very</h4>
+        <p class="sentence">The soup is very hot.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">v-e-r-y.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">v – e – r – y</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-us" data-set="9">
+        <h4 class="cw">us</h4>
+        <p class="sentence">Come with us.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters: u, s.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">u – s</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-go" data-set="9">
+        <h4 class="cw">go</h4>
+        <p class="sentence">Let us go home.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Two letters. The o says its name.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">g – o</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-our" data-set="9">
+        <h4 class="cw">our</h4>
+        <p class="sentence">This is our house.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">o-u-r. The o and u work together.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">o – u – r</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-good" data-set="9">
+        <h4 class="cw">good</h4>
+        <p class="sentence">That is a good book.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">g-o-o-d. Two o letters in the middle.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">g – o – o – d</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-may" data-set="9">
+        <h4 class="cw">may</h4>
+        <p class="sentence">May I have a turn?</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">m-a-y. The a and y work together.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">m – a – y</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-make" data-set="9">
+        <h4 class="cw">make</h4>
+        <p class="sentence">Let us make a card.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">m-a-k-e. The e at the end is quiet.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">m – a – k – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+    </div>
+  </section>
+  <section class="block" id="set10" aria-labelledby="set10-h">
+    <h3 id="set10-h">Set 10</h3>
+    <details class="steps"><summary>Grown-up help for this set</summary><p>Two, where, and many have parts that are not spelled the way they sound.</p></details>
+    <div class="cardgrid">
+      <article class="wcard" id="w-here" data-set="10">
+        <h4 class="cw">here</h4>
+        <p class="sentence">Come here, please.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">h-e-r-e. The e at the end is quiet.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">h – e – r – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-two" data-set="10">
+        <h4 class="cw">two</h4>
+        <p class="sentence">I have two hands.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Tricky word. It sounds like “too.” Remember t-w-o.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">t – w – o</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-many" data-set="10">
+        <h4 class="cw">many</h4>
+        <p class="sentence">I see many stars.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">m-a-n-y. It ends with y.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">m – a – n – y</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-also" data-set="10">
+        <h4 class="cw">also</h4>
+        <p class="sentence">I also like pears.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">a-l-s-o. It has al and so in it.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">a – l – s – o</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-way" data-set="10">
+        <h4 class="cw">way</h4>
+        <p class="sentence">This is the way.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">w-a-y. The a and y work together.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">w – a – y</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-did" data-set="10">
+        <h4 class="cw">did</h4>
+        <p class="sentence">I did my best.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">d is at the start and at the end. Check both d letters.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">d – i – d</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-where" data-set="10">
+        <h4 class="cw">where</h4>
+        <p class="sentence">Where is my hat?</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">Remember w-h-e-r-e. The word here is hiding inside.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">w – h – e – r – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-use" data-set="10">
+        <h4 class="cw">use</h4>
+        <p class="sentence">I use a pencil.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">u-s-e. The e at the end is quiet.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">u – s – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-down" data-set="10">
+        <h4 class="cw">down</h4>
+        <p class="sentence">Sit down, please.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">d-o-w-n. The o and w work together.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">d – o – w – n</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+      <article class="wcard" id="w-home" data-set="10">
+        <h4 class="cw">home</h4>
+        <p class="sentence">I go home after school.</p>
+        <details class="steps"><summary>Show learning steps</summary>
+          <ol>
+            <li><strong>SAY IT:</strong> Say the word out loud.</li>
+            <li><strong>LOOK CLOSELY:</strong> <span class="look">h-o-m-e. The e at the end is quiet.</span></li>
+            <li><strong>SPELL IT:</strong> <span class="letters">h – o – m – e</span></li>
+            <li><strong>HIDE IT:</strong> Cover the word and the sentence.</li>
+            <li><strong>TRY IT:</strong> Write the word on paper from memory.</li>
+            <li><strong>CHECK IT:</strong> Uncover the word. Do the letters match? If not: &ldquo;Good try&mdash;let&rsquo;s look together.&rdquo;</li>
+            <li><strong>USE IT:</strong> Say a sentence with the word.</li>
+          </ol>
+        </details>
+      </article>
+    </div>
+  </section>
+  </section>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var TEST_ID = 'spelling-100-parent-list';
+  var VERSION = 1;
+  var KEY = 'spelling-100-parent-list-v1';
+  var $ = function (id) { return document.getElementById(id); };
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined && text !== null) e.textContent = text;
+    return e;
+  }
+  function btn(label, cls, fn) {
+    var b = el('button', cls || '', label);
+    b.type = 'button';
+    b.addEventListener('click', fn);
+    return b;
+  }
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  /* ---- Word data is read from the page markup ---- */
+  var cardEls = [].slice.call(document.querySelectorAll('article.wcard'));
+  var WORDS = cardEls.map(function (c) {
+    return {
+      w: c.querySelector('.cw').textContent.trim(),
+      set: parseInt(c.getAttribute('data-set'), 10),
+      sentence: c.querySelector('.sentence').textContent.trim(),
+      look: c.querySelector('.look').textContent.trim()
+    };
+  });
+  var BY = {};
+  WORDS.forEach(function (x) { BY[x.w] = x; });
+  var SETTITLES = {};
+  [].forEach.call(document.querySelectorAll('[data-settitle]'), function (e) {
+    SETTITLES[e.getAttribute('data-settitle')] = e.textContent.trim();
+  });
+
+  var FIELDS = ['seen', 'ind', 'asst', 'wrong', 'streak'];
+  var prog = {};
+  function blank() { return { seen: 0, ind: 0, asst: 0, wrong: 0, streak: 0 }; }
+  WORDS.forEach(function (x) { prog[x.w] = blank(); });
+  function statusOf(p) {
+    if (p.streak >= 2) return 'without';
+    if (p.seen || p.ind || p.asst || p.wrong) return 'practicing';
+    return 'new';
+  }
+  var STATUS_TEXT = { without: 'Spelled correctly without help', practicing: 'Practicing', 'new': 'Not started' };
+
+  var canSpeak = ('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window);
+  function speak(word) {
+    try {
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(word);
+      u.lang = 'en-US'; u.rate = 0.8;
+      window.speechSynthesis.speak(u);
+    } catch (e) { /* speech is optional */ }
+  }
+  function audio(word) {
+    if (canSpeak) {
+      var b = btn('Hear the word', 'secondary', function () { speak(word); });
+      return b;
+    }
+    return el('p', 'note', 'Ask a grown-up to say the word.');
+  }
+
+  /* ---- Storage ---- */
+  var storageOK = false;
+  function snapshot() { return { testId: TEST_ID, version: VERSION, savedAt: new Date().toISOString(), words: prog }; }
+  function storageNote() {
+    $('storage-note').textContent = storageOK
+      ? 'Progress is saved automatically on this device in this browser. Use "Save progress" for a backup file.'
+      : 'Progress cannot be saved automatically in this browser. Use "Save progress" to keep a backup file, or your progress will be lost when the page closes.';
+  }
+  function persist() {
+    try { localStorage.setItem(KEY, JSON.stringify(snapshot())); storageOK = true; }
+    catch (e) { storageOK = false; }
+    storageNote();
+  }
+  function validate(d) {
+    if (!d || typeof d !== 'object' || Array.isArray(d)) return 'This file is not saved progress.';
+    if (d.testId !== TEST_ID || d.version !== VERSION) return 'This file is for a different activity or version, so it was not loaded.';
+    if (!d.words || typeof d.words !== 'object' || Array.isArray(d.words)) return 'This file has no progress in it.';
+    for (var k in d.words) {
+      if (!Object.prototype.hasOwnProperty.call(d.words, k)) continue;
+      if (!Object.prototype.hasOwnProperty.call(BY, k)) return 'This file has a word that is not in this activity.';
+      var p = d.words[k];
+      if (!p || typeof p !== 'object' || Array.isArray(p)) return 'This file has progress that cannot be read.';
+      for (var i = 0; i < FIELDS.length; i++) {
+        var v = p[FIELDS[i]];
+        if (v === undefined) continue;
+        if (typeof v !== 'number' || v < 0 || v > 100000 || Math.floor(v) !== v) return 'This file has progress that cannot be read.';
+      }
+    }
+    return null;
+  }
+  function applyData(d) {
+    WORDS.forEach(function (x) {
+      var p = (d.words && Object.prototype.hasOwnProperty.call(d.words, x.w)) ? d.words[x.w] : {};
+      var n = blank();
+      FIELDS.forEach(function (f) { n[f] = p[f] || 0; });
+      prog[x.w] = n;
+    });
+  }
+
+  /* ---- Home screen ---- */
+  function homeMsg(t) { $('home-msg').textContent = t; }
+  function renderCounts() {
+    var n = 0, pr = 0, wo = 0, ind = 0, as = 0;
+    WORDS.forEach(function (x) {
+      var p = prog[x.w], s = statusOf(p);
+      if (s === 'new') n++; else if (s === 'without') wo++; else pr++;
+      ind += p.ind; as += p.asst;
+    });
+    $('c-practicing').textContent = pr; $('c-without').textContent = wo; $('c-new').textContent = n;
+    $('c-ind').textContent = ind; $('c-asst').textContent = as;
+  }
+  function renderChips() {
+    var box = $('chips'); box.textContent = '';
+    for (var s = 1; s <= 10; s++) {
+      box.appendChild(el('h3', null, 'Set ' + s + (SETTITLES[s] ? ': ' + SETTITLES[s] : '')));
+      var ul = el('ul', 'chips');
+      WORDS.filter(function (x) { return x.set === s; }).forEach(function (x) {
+        var li = el('li', null, x.w);
+        li.appendChild(el('span', null, STATUS_TEXT[statusOf(prog[x.w])]));
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+    }
+  }
+  function refreshHome() { renderCounts(); renderChips(); }
+  function pickDefaultScope() {
+    for (var s = 1; s <= 10; s++) {
+      var done = WORDS.filter(function (x) { return x.set === s; }).every(function (x) { return statusOf(prog[x.w]) === 'without'; });
+      if (!done) { $('scope').value = String(s); return; }
+    }
+  }
+
+  /* ---- Session ---- */
+  var S = null;
+
+  function showHome() {
+    S = null;
+    document.body.classList.remove('in-session');
+    $('home').hidden = false; $('session').hidden = true;
+    if (canSpeak) { try { window.speechSynthesis.cancel(); } catch (e) {} }
+    refreshHome();
+    window.scrollTo(0, 0);
+  }
+
+  function begin(mode, scope, shuf) {
+    var list;
+    if (scope === 'practicing') {
+      list = WORDS.filter(function (x) { return statusOf(prog[x.w]) === 'practicing'; });
+    } else {
+      list = WORDS.filter(function (x) { return x.set === parseInt(scope, 10); });
+    }
+    if (!list.length) { homeMsg('There are no words to practice here yet. Try learning a set first.'); return; }
+    var q = list.map(function (x) { return x.w; });
+    if (shuf) shuffle(q);
+    S = { mode: mode, scope: scope, shuf: shuf, queue: q, i: 0, res: {}, requeued: {}, L: { stage: 'front' }, cur: null, review: false };
+    if (mode !== 'learn') S.cur = newCur();
+    document.body.classList.add('in-session');
+    $('home').hidden = true; $('session').hidden = false;
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  function newCur() { return { w: S.queue[S.i], tries: 0, helped: false, stage: 'attempt', attempt: '', retry: false, result: '' }; }
+
+  function topbar(title) {
+    var d = el('div', 'sess-top');
+    var h = el('h2', null, title); h.tabIndex = -1; d.appendChild(h);
+    if (!S.review) {
+      d.appendChild(el('p', 'sess-count', 'Word ' + Math.min(S.i + 1, S.queue.length) + ' of ' + S.queue.length));
+      var pr = el('progress'); pr.max = S.queue.length; pr.value = S.i;
+      pr.setAttribute('aria-label', 'Progress through this set');
+      d.appendChild(pr);
+    }
+    var row = el('div', 'row');
+    row.appendChild(btn('Stop for now', '', showHome));
+    if (!S.review && S.queue.length - S.i > 2) {
+      row.appendChild(btn('Shuffle the rest', '', function () {
+        var head = S.queue.slice(0, S.i + 1), tail = shuffle(S.queue.slice(S.i + 1));
+        S.queue = head.concat(tail); render();
+      }));
+    }
+    d.appendChild(row);
+    return d;
+  }
+
+  function lcsMarks(t, a) {
+    t = t.toLowerCase(); a = a.toLowerCase();
+    var n = t.length, m = a.length, d = [], i, j;
+    for (i = 0; i <= n; i++) { d[i] = []; for (j = 0; j <= m; j++) d[i][j] = 0; }
+    for (i = 1; i <= n; i++) for (j = 1; j <= m; j++) {
+      d[i][j] = t.charAt(i - 1) === a.charAt(j - 1) ? d[i - 1][j - 1] + 1 : Math.max(d[i - 1][j], d[i][j - 1]);
+    }
+    var tm = [], am = [];
+    for (i = 0; i < n; i++) tm[i] = false;
+    for (j = 0; j < m; j++) am[j] = false;
+    i = n; j = m;
+    while (i > 0 && j > 0) {
+      if (t.charAt(i - 1) === a.charAt(j - 1)) { tm[i - 1] = true; am[j - 1] = true; i--; j--; }
+      else if (d[i - 1][j] >= d[i][j - 1]) i--; else j--;
+    }
+    return { t: tm, a: am };
+  }
+  function letters(str, marks, cls) {
+    var s = el('span', cls || 'letters');
+    s.setAttribute('aria-label', str.split('').join(' '));
+    for (var k = 0; k < str.length; k++) {
+      var c = el('span', marks && !marks[k] ? 'ch bad' : 'ch', str.charAt(k));
+      c.setAttribute('aria-hidden', 'true');
+      s.appendChild(c);
+    }
+    return s;
+  }
+  function liStep(label, text, extra) {
+    var li = el('li');
+    li.appendChild(el('strong', null, label + ': '));
+    if (text) li.appendChild(document.createTextNode(text));
+    if (extra) { var d = el('div'); d.appendChild(extra); li.appendChild(d); }
+    return li;
+  }
+  function inputForm(onSubmit, label) {
+    var f = el('form', 'tryform'); f.setAttribute('action', '#');
+    var inp = el('input', 'spell'); inp.type = 'text';
+    inp.setAttribute('autocomplete', 'off'); inp.setAttribute('autocapitalize', 'none');
+    inp.setAttribute('autocorrect', 'off'); inp.setAttribute('enterkeyhint', 'done');
+    inp.spellcheck = false; inp.maxLength = 30; inp.setAttribute('aria-label', label);
+    var b = el('button', 'primary', 'Check it'); b.type = 'submit';
+    f.addEventListener('submit', function (e) { e.preventDefault(); onSubmit(inp.value); });
+    f.appendChild(inp); f.appendChild(b);
+    return { form: f, input: inp };
+  }
+  function liveP() { var p = el('p', 'feedback'); p.setAttribute('role', 'status'); p.setAttribute('aria-live', 'polite'); return p; }
+
+  function render() {
+    if (!S) return;
+    if (S.review) renderReview();
+    else if (S.mode === 'learn') renderLearn();
+    else if (S.mode === 'type') renderTyping();
+    else renderPaper();
+  }
+
+  /* ---- Learn (guided) ---- */
+  function renderLearn() {
+    var st = $('stage'); st.textContent = '';
+    var w = BY[S.queue[S.i]], L = S.L;
+    st.appendChild(topbar('Learn the words together'));
+    var card = el('div', 'bigcard');
+    var fb = liveP();
+
+    if (L.stage === 'front' || L.stage === 'steps') {
+      card.appendChild(el('p', 'bigword', w.w));
+      card.appendChild(el('p', 'bigsentence', w.sentence));
+    }
+    if (L.stage === 'front') {
+      var r = el('div', 'row');
+      r.appendChild(audio(w.w));
+      r.appendChild(btn('Show learning steps', 'primary', function () {
+        S.L = { stage: 'steps' }; prog[w.w].seen = 1; persist(); renderCounts(); render();
+      }));
+      card.appendChild(r);
+    } else if (L.stage === 'steps') {
+      var ol = el('ol', 'steps-list');
+      ol.appendChild(liStep('SAY IT', 'Say the word out loud.', canSpeak ? audio(w.w) : null));
+      ol.appendChild(liStep('LOOK CLOSELY', w.look));
+      ol.appendChild(liStep('SPELL IT', null, letters(w.w, null, 'bigletters')));
+      ol.appendChild(liStep('HIDE IT', 'Get ready to spell it from memory.', btn('Hide the word and sentence', 'primary', function () {
+        S.L = { stage: 'try' }; render();
+      })));
+      card.appendChild(ol);
+    } else if (L.stage === 'try') {
+      card.appendChild(el('p', 'bigword', '• • •'));
+      card.appendChild(el('p', null, 'The word and sentence are hidden.'));
+      var ol2 = el('ol', 'steps-list'); ol2.start = 5;
+      ol2.appendChild(liStep('TRY IT', 'Type the word from memory, or write it on paper.'));
+      card.appendChild(ol2);
+      var rr = el('div', 'row'); rr.appendChild(audio(w.w)); card.appendChild(rr);
+      var f = inputForm(function (v) {
+        var a = v.trim().toLowerCase();
+        if (!a) { fb.textContent = 'Type your try first.'; return; }
+        var ok = (a === w.w.toLowerCase());
+        S.L = { stage: 'checked', attempt: v.trim(), ok: ok };
+        if (ok) { prog[w.w].asst++; persist(); renderCounts(); }
+        render();
+      }, 'Type the word from memory');
+      card.appendChild(f.form);
+      card.appendChild(fb);
+      card.appendChild(btn('Show me again', '', function () { S.L = { stage: 'steps' }; render(); }));
+    } else if (L.stage === 'checked') {
+      if (L.ok) {
+        var o = el('ol', 'steps-list'); o.start = 6;
+        o.appendChild(liStep('CHECK IT', 'Yes! You spelled it correctly.', letters(w.w, null, 'bigletters')));
+        o.appendChild(liStep('USE IT', 'Say a sentence using the word.'));
+        card.appendChild(o);
+        card.appendChild(el('p', null, 'Tap "Next card" when you are ready.'));
+      } else {
+        var mk = lcsMarks(w.w, L.attempt.toLowerCase());
+        card.appendChild(el('p', 'feedback', 'Good try—let’s look together.'));
+        card.appendChild(el('p', null, 'You wrote:'));
+        card.appendChild(letters(L.attempt, mk.a, 'bigletters'));
+        card.appendChild(el('p', null, 'The word is:'));
+        card.appendChild(letters(w.w, mk.t, 'bigletters'));
+        var r3 = el('div', 'row');
+        r3.appendChild(audio(w.w));
+        r3.appendChild(btn('Try again', 'primary', function () { S.L = { stage: 'try' }; render(); }));
+        card.appendChild(r3);
+      }
+    }
+    st.appendChild(card);
+
+    var nav = el('div', 'row');
+    var back = btn('Back', '', function () { S.i--; S.L = { stage: 'front' }; render(); });
+    if (S.i === 0) back.disabled = true;
+    nav.appendChild(back);
+    var last = (S.i === S.queue.length - 1);
+    nav.appendChild(btn(last ? 'Finish this set' : 'Next card', L.stage === 'checked' && L.ok ? 'primary' : '', function () {
+      if (last) { S.review = true; } else { S.i++; S.L = { stage: 'front' }; }
+      render(); window.scrollTo(0, 0);
+    }));
+    st.appendChild(nav);
+
+    var dots = el('div', 'dots'); dots.setAttribute('role', 'group'); dots.setAttribute('aria-label', 'Go to a card');
+    S.queue.forEach(function (_, k) {
+      var b = btn(String(k + 1), k === S.i ? 'on' : '', function () { S.i = k; S.L = { stage: 'front' }; render(); });
+      b.setAttribute('aria-label', 'Go to card ' + (k + 1));
+      if (k === S.i) b.setAttribute('aria-current', 'true');
+      dots.appendChild(b);
+    });
+    st.appendChild(dots);
+  }
+
+  /* ---- Practice: type it ---- */
+  function requeue(w) {
+    if (!S.requeued[w]) { S.requeued[w] = 1; S.queue.push(w); }
+  }
+  function note(w, r) { S.res[w] = (S.res[w] === 'asst' || r === 'asst') ? 'asst' : 'ind'; }
+  function advance() {
+    S.i++;
+    if (S.i >= S.queue.length) { S.review = true; }
+    else if (S.mode !== 'learn') { S.cur = newCur(); }
+    render(); window.scrollTo(0, 0);
+  }
+
+  function renderTyping() {
+    var st = $('stage'); st.textContent = '';
+    var C = S.cur, w = BY[C.w], p = prog[C.w];
+    st.appendChild(topbar('Spelling practice'));
+    var card = el('div', 'bigcard');
+    var fb = liveP();
+
+    if (C.stage === 'attempt') {
+      card.appendChild(el('p', 'bigword', '?'));
+      card.appendChild(el('p', null, C.retry ? 'The word is hidden again. Try it from memory.' : 'Listen to the word. Then type it.'));
+      var rr = el('div', 'row'); rr.appendChild(audio(C.w)); card.appendChild(rr);
+      var f = inputForm(function (v) {
+        var raw = v.trim(), a = raw.toLowerCase();
+        if (!a) { fb.textContent = 'Type your try first.'; return; }
+        var first = (C.tries === 0 && !C.helped);
+        C.tries++;
+        C.attempt = raw;
+        if (a === C.w.toLowerCase()) {
+          if (first) { p.ind++; p.streak++; C.result = 'ind'; }
+          else { p.asst++; p.streak = 0; C.result = 'asst'; }
+          note(C.w, C.result);
+          C.stage = 'right';
+        } else {
+          if (first) { p.wrong++; p.streak = 0; requeue(C.w); note(C.w, 'asst'); }
+          C.helped = true; C.stage = 'study';
+        }
+        persist(); renderCounts(); render();
+      }, 'Type the word you heard');
+      card.appendChild(f.form);
+      card.appendChild(fb);
+      var r2 = el('div', 'row');
+      r2.appendChild(btn(C.helped || C.retry ? 'Show me again' : 'I need help', '', function () {
+        if (!C.helped) { p.streak = 0; requeue(C.w); note(C.w, 'asst'); persist(); renderCounts(); }
+        C.helped = true; C.attempt = ''; C.stage = 'study'; render();
+      }));
+      if (C.tries === 0 && !C.helped && S.queue.length > 1) {
+        r2.appendChild(btn('Skip for now', '', function () {
+          S.queue.splice(S.i, 1); S.queue.push(C.w); S.cur = newCur(); render();
+        }));
+      }
+      card.appendChild(r2);
+      var gd = el('details', 'steps');
+      gd.appendChild(el('summary', null, 'Grown-up help'));
+      gd.appendChild(el('p', 'small', 'Open this to read the word aloud. Opening it counts as help for this word.'));
+      var shown = el('p', 'bigword'); gd.appendChild(shown);
+      gd.addEventListener('toggle', function () {
+        if (gd.open) {
+          if (!C.helped) { C.helped = true; p.streak = 0; requeue(C.w); note(C.w, 'asst'); persist(); renderCounts(); }
+          shown.textContent = C.w;
+        } else { shown.textContent = ''; }
+      });
+      card.appendChild(gd);
+    } else if (C.stage === 'study') {
+      if (C.attempt) {
+        var mk = lcsMarks(C.w, C.attempt.toLowerCase());
+        card.appendChild(el('p', 'feedback', 'Good try—let’s look together.'));
+        card.appendChild(el('p', null, 'You wrote:'));
+        card.appendChild(letters(C.attempt, mk.a, 'bigletters'));
+        card.appendChild(el('p', null, 'The word is:'));
+        card.appendChild(letters(C.w, mk.t, 'bigletters'));
+      } else {
+        card.appendChild(el('p', 'feedback', 'Let’s look together.'));
+        card.appendChild(el('p', null, 'The word is:'));
+        card.appendChild(letters(C.w, null, 'bigletters'));
+      }
+      card.appendChild(el('p', null, w.look));
+      var r3 = el('div', 'row');
+      r3.appendChild(audio(C.w));
+      r3.appendChild(btn('Try again', 'primary', function () { C.retry = true; C.stage = 'attempt'; render(); }));
+      card.appendChild(r3);
+    } else {
+      card.appendChild(el('p', 'feedback', C.result === 'ind' ? 'Yes! You spelled it correctly.' : 'You did it! We will practice this word again soon.'));
+      card.appendChild(letters(C.w, null, 'bigletters'));
+      card.appendChild(el('p', 'bigsentence', w.sentence));
+      card.appendChild(el('p', null, 'Say a sentence using the word.'));
+      card.appendChild(btn('Next word', 'primary', advance));
+    }
+    st.appendChild(card);
+  }
+
+  /* ---- Practice: paper with a grown-up ---- */
+  function renderPaper() {
+    var st = $('stage'); st.textContent = '';
+    var C = S.cur, p = prog[C.w];
+    if (C.show === undefined) C.show = false;
+    st.appendChild(topbar('Paper practice with a grown-up'));
+    var card = el('div', 'bigcard');
+    card.appendChild(el('p', null, 'Grown-up: see the word, say it aloud, then hide it. Child: write the word on paper.'));
+    var r = el('div', 'row');
+    r.appendChild(audio(C.w));
+    r.appendChild(btn(C.show ? 'Hide the word' : 'Grown-up: show the word', '', function () { C.show = !C.show; render(); }));
+    card.appendChild(r);
+    if (C.show) {
+      card.appendChild(el('p', 'bigword', C.w));
+      card.appendChild(letters(C.w, null, 'bigletters'));
+    }
+    card.appendChild(el('p', null, 'Grown-up: check the paper, then choose:'));
+    var m = el('div', 'row');
+    m.appendChild(btn('Spelled correctly on their own', 'good', function () {
+      p.ind++; p.streak++; note(C.w, 'ind'); persist(); renderCounts(); advance();
+    }));
+    m.appendChild(btn('Needs more practice', '', function () {
+      p.wrong++; p.streak = 0; requeue(C.w); note(C.w, 'asst'); persist(); renderCounts(); advance();
+    }));
+    card.appendChild(m);
+    st.appendChild(card);
+  }
+
+  /* ---- Set review ---- */
+  function renderReview() {
+    var st = $('stage'); st.textContent = '';
+    var setNo = S.scope === 'practicing' ? '' : parseInt(S.scope, 10);
+    st.appendChild(topbar('Set review' + (setNo ? ': Set ' + setNo : '')));
+    st.appendChild(el('p', null, 'Nice work! Short sessions of about 5–10 minutes are best. You can stop now or keep going.'));
+    var uniq = [];
+    S.queue.forEach(function (x) { if (uniq.indexOf(x) < 0) uniq.push(x); });
+    var ul = el('ul', 'review');
+    uniq.forEach(function (x) {
+      var li = el('li'); li.appendChild(el('span', 'rw', x));
+      var r = S.res[x], t;
+      if (S.mode === 'learn') t = prog[x].seen ? 'Looked at together' : 'Not looked at yet';
+      else t = r === 'ind' ? 'Spelled on your own' : r === 'asst' ? 'Needed a look. We will practice it again.' : 'Not tried yet';
+      li.appendChild(el('span', 'rt', t)); ul.appendChild(li);
+    });
+    st.appendChild(ul);
+    var row = el('div', 'row');
+    if (S.mode === 'learn') {
+      row.appendChild(btn('Practice these words', 'primary', function () { begin('type', S.scope, S.shuf); }));
+      row.appendChild(btn('Learn again', '', function () { begin('learn', S.scope, S.shuf); }));
+    } else {
+      row.appendChild(btn('Practice again', 'primary', function () { begin(S.mode, S.scope, S.shuf); }));
+      if (setNo && setNo < 10) row.appendChild(btn('Learn the next set', '', function () { begin('learn', String(setNo + 1), S.shuf); }));
+    }
+    row.appendChild(btn('All done for now', '', showHome));
+    st.appendChild(row);
+  }
+
+  /* ---- Home buttons and tools ---- */
+  function go(mode) { homeMsg(''); begin(mode, $('scope').value, $('shuffle').checked); }
+  $('go-learn').addEventListener('click', function () { go('learn'); });
+  $('go-type').addEventListener('click', function () { go('type'); });
+  $('go-paper').addEventListener('click', function () { go('paper'); });
+  $('btn-print').addEventListener('click', function () { window.print(); });
+
+  function download(name, text, type) {
+    var blob = new Blob([text], { type: type });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 3000);
+  }
+  $('btn-save').addEventListener('click', function () {
+    download('spelling-progress.json', JSON.stringify(snapshot(), null, 2), 'application/json');
+    homeMsg('Your browser was asked to download the progress file. Check your Downloads or Files app to make sure it is there.');
+  });
+
+  var pending = null;
+  $('file-load').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    var r = new FileReader();
+    r.onerror = function () { homeMsg('That file could not be read.'); };
+    r.onload = function () {
+      var d;
+      try { d = JSON.parse(String(r.result)); } catch (x) { homeMsg('That file could not be read as saved progress.'); return; }
+      var err = validate(d);
+      if (err) { homeMsg(err); return; }
+      pending = d;
+      $('load-text').textContent = 'Replace the progress on this page with the progress in this file?';
+      $('load-panel').hidden = false;
+    };
+    r.readAsText(f);
+    e.target.value = '';
+  });
+  $('load-yes').addEventListener('click', function () {
+    if (pending) { applyData(pending); persist(); refreshHome(); homeMsg('Saved progress was loaded.'); }
+    pending = null; $('load-panel').hidden = true;
+  });
+  $('load-no').addEventListener('click', function () { pending = null; $('load-panel').hidden = true; homeMsg('Nothing was changed.'); });
+
+  $('btn-reset').addEventListener('click', function () { $('reset-ok').checked = false; $('reset-yes').disabled = true; $('reset-panel').hidden = false; });
+  $('reset-ok').addEventListener('change', function () { $('reset-yes').disabled = !$('reset-ok').checked; });
+  $('reset-no').addEventListener('click', function () { $('reset-panel').hidden = true; });
+  $('reset-yes').addEventListener('click', function () {
+    WORDS.forEach(function (x) { prog[x.w] = blank(); });
+    persist(); refreshHome(); $('reset-panel').hidden = true; homeMsg('Progress was erased.');
+  });
+
+  window.addEventListener('beforeprint', function () {
+    var ds = document.querySelectorAll('details'); window.__open = [];
+    for (var i = 0; i < ds.length; i++) { window.__open.push(ds[i].open); ds[i].open = true; }
+  });
+  window.addEventListener('afterprint', function () {
+    var ds = document.querySelectorAll('details');
+    for (var i = 0; i < ds.length && window.__open && i < window.__open.length; i++) ds[i].open = window.__open[i];
+  });
+
+  /* ---- Startup ---- */
+  try {
+    var raw = localStorage.getItem(KEY);
+    storageOK = true;
+    if (raw) {
+      var d0 = JSON.parse(raw);
+      if (!validate(d0)) applyData(d0);
+    }
+    localStorage.setItem(KEY + '-probe', '1'); localStorage.removeItem(KEY + '-probe');
+  } catch (e) { storageOK = false; }
+  storageNote();
+  pickDefaultScope();
+  refreshHome();
+  var pb = document.querySelector('#word-list .js-only'); if (pb) pb.style.display = 'inline-flex';
+})();
+</script>
+<script>
+(function () {
+  var n = document.getElementById('offline-note');
+  function say(t) { if (n) n.textContent = t; }
+  if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) {
+    say('Offline use: not set up. Open this page from its web address in Chrome and use Install app to make it work offline.');
+    return;
+  }
+  navigator.serviceWorker.register('sw.js').then(function () { return navigator.serviceWorker.ready; })
+    .then(function () { say('Offline use: ready. This page is saved on this device and works without internet.'); })
+    .catch(function () { say('Offline use: could not be set up in this browser.'); });
+})();
+</script>
+</body>
+</html>
